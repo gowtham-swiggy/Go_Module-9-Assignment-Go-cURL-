@@ -7,58 +7,51 @@ import (
 )
 
 type Student struct {
-	Name string `json:"name`
-	Roll int    `json:"roll`
+	Name string `json:"name"`
+	Roll int    `json:"roll"`
 }
-
-var studentList = []Student{}
 
 func main() {
 	fmt.Println("Server started succesfully :) ")
 
 	http.HandleFunc("/home", homeHandler)
+	http.HandleFunc("/", anythingHandler)
 
 	http.HandleFunc("/newstudent", addNewStudentHandler)
-
 	http.HandleFunc("/students", getStudentsHandler)
-
-	http.HandleFunc("/", anythingHandler)
 
 	http.ListenAndServe("127.0.0.1:8080", nil)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome Students!")
+	fmt.Fprint(w, "Welcome Students! ")
 }
 
 func getStudentsHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "Application/json")
 	student := Student{
-		Name: "Gowtham", Roll: 01,
+		Name: "Gowtham",
+		Roll: 1,
+	}
+	err := json.NewEncoder(w).Encode(student)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	if err := json.NewEncoder(w).Encode(student); err != nil {
-		fmt.Println(err)
-	}
-	for _, j := range studentList {
-		fmt.Fprintf(w, "{\"name\": \"%s\",\"roll\": \"%v\"\n", j.Name, j.Roll)
-	}
 }
 
 func addNewStudentHandler(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "Application/json")
 	student := Student{}
-
-	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
+	err := json.NewDecoder(r.Body).Decode(&student)
+	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	fmt.Println(student)
-	studentList = append(studentList, student)
-	if err := json.NewEncoder(w).Encode(student); err != nil {
-		fmt.Println(err)
-	}
+	fmt.Fprint(w, "Data obtained from body is ", student)
 
 }
 
